@@ -1,54 +1,34 @@
-import { Meteor } from "meteor/meteor";
-import { LinksCollection } from "/imports/api/links";
-import { Random } from "meteor/random";
+import { Meteor } from 'meteor/meteor';
+import { Tasks } from '/imports/api/TasksCollection';
+import '/imports/api/tasksPublications';
 
-async function insertLink({ title, url }) {
-  await LinksCollection.insertAsync({ title, url, createdAt: new Date() });
-}
-
+// Adicionamos o "async" antes da função do startup
 Meteor.startup(async () => {
-  // If the Links collection is empty, add some data.
-  if ((await LinksCollection.find().countAsync()) === 0) {
-    await insertLink({
-      title: "Do the Tutorial",
-      url: "https://docs.meteor.com/tutorials/react/",
+  
+  // Usamos await e countAsync()
+  if (await Tasks.find().countAsync() === 0) {
+    console.log('Banco de dados vazio. Criando tarefas de teste...');
+
+    
+    await Tasks.insertAsync({
+      nome: 'Aprender rotas no React',
+      criador: 'sistema',
+      ownerId: 'id_falso_123', 
+      isPersonal: false,
+      situacao: 'Cadastrada',
+      createdAt: new Date(),
     });
 
-    await insertLink({
-      title: "Follow the Guide",
-      url: "https://docs.meteor.com/tutorials/application-structure/",
+    
+    await Tasks.insertAsync({
+      nome: 'Comprar presente de aniversário',
+      criador: 'joao',
+      ownerId: 'id_falso_456', 
+      isPersonal: true, 
+      situacao: 'Em Andamento',
+      createdAt: new Date(),
     });
 
-    await insertLink({
-      title: "Read the Docs",
-      url: "https://docs.meteor.com",
-    });
-
-    await insertLink({
-      title: "Discussions",
-      url: "https://forums.meteor.com",
-    });
-
-    await insertLink({
-      title: "Join us on Discord",
-      url: "https://discord.gg/6mS3wHNg",
-    });
-
-    await insertLink({
-      title: "Deploying in Galaxy",
-      url: "https://www.meteor.com/hosting",
-    });
+    console.log('Tarefas de teste criadas com sucesso!');
   }
-
-  // We publish the entire Links collection to all clients.
-  // In order to be fetched in real-time to the clients
-  Meteor.publish("links", function () {
-    return LinksCollection.find();
-  });
-});
-
-Meteor.methods({
-  about() {
-    return `This is a Meteor application running React with React Router. this is a generated id: ${Random.id()}`;
-  },
 });

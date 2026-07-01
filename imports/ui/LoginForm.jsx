@@ -22,7 +22,7 @@ export const LoginForm = () => {
         <h2>Logar Conta</h2>
 
       <div>
-        <label htmlFor="username">Username</label>
+        <label htmlFor="username">Usuario</label>
 
         <input
           type="text"

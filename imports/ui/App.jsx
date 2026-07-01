@@ -1,32 +1,41 @@
 import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
+import { Dashboard } from './Dashboard';
+import { TaskList } from './TaskList';
 
 export const App = () => {
   const user = useTracker(() => Meteor.user());
-
+  const loggingIn = useTracker(() => Meteor.loggingIn());
   const [showLogin, setShowLogin] = useState(true);
+
+  if (loggingIn) {
+    return <div>Carregando...</div>;
+  }
+
 
   if (!user) {
     return (
       <div className="auth-container">
-        
         {showLogin ? <LoginForm /> : <RegisterForm />}
-        
-        
-        <button onClick={() => setShowLogin(!showLogin)} style={{ marginTop: '15px' }}>
-          {showLogin ? 'Cadastrar' : 'Fazer Login'}
+        <button onClick={() => setShowLogin(!showLogin)}>
+          {showLogin ? 'Cadastrar-se' : 'Fazer login'}
         </button>
       </div>
     );
   }
 
   return (
-    <div>
-      <h1>Bem-vindo ao ToDo List</h1>
-      <button onClick={() => Meteor.logout()}>Sair</button>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/tasks" element={<TaskList />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
