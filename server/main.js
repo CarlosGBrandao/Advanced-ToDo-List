@@ -1,6 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Tasks } from '/imports/api/TasksCollection';
 import '/imports/api/tasksPublications';
+import '/imports/api/userMethods';
+import '/imports/api/tasksMethods';
 
 // Adicionamos o "async" antes da função do startup
 Meteor.startup(async () => {

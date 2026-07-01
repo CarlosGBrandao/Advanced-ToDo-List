@@ -7,6 +7,9 @@ import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { Dashboard } from './Dashboard';
 import { TaskList } from './TaskList';
+import { UserProfile } from './UserProfile';
+import { TaskDetails } from './TaskDetails';
+import { MainLayout } from './MainLayout';
 
 export const App = () => {
   const user = useTracker(() => Meteor.user());
@@ -31,11 +34,15 @@ export const App = () => {
 
   return (
     <BrowserRouter>
+    <MainLayout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/tasks" element={<TaskList />} />
         <Route path="*" element={<Navigate to="/" />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/tasks/:taskId" element={<TaskDetails />} />
       </Routes>
+      </MainLayout>
     </BrowserRouter>
   );
 };

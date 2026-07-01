@@ -1,22 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 
-import { IconButton, CircularProgress, Box } from '@mui/material';
+import { IconButton, CircularProgress, Box, Button } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add'; 
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { Lista } from '../components/Lista.jsx';
 
 import { Tasks } from 'imports/api/TasksCollection';
+import { TaskFormModal } from './TaskFormModal';
 
 export const TaskList = () => {
 
     const navigate = useNavigate();
 
     const currentUser = useTracker(() => Meteor.user());
+
+    const [modalOpen, setModalOpen] = useState(false);
 
   const { tasks, isLoading } = useTracker(() => {
     const subscription = Meteor.subscribe('tasks.all');
@@ -49,31 +54,60 @@ export const TaskList = () => {
 
 
   return (
-    <Lista
-      title="Tarefas Cadastradas"
-      items={tasks}
-      icon={<AssignmentIcon color="primary" />}
-      primaryExtractor={(tarefa) => tarefa.nome}
-      secondaryExtractor={(tarefa) => `Criada por: ${tarefa.criador} ${tarefa.isPersonal ? '(Pessoal)' : ''}`}
+    <Box sx={{ p: 2, maxWidth: '600px', margin: '0 auto' }}>
       
-      renderActions={(tarefa) => {
     
-        if (!currentUser || currentUser._id !== tarefa.ownerId) {
-          return null; 
-        }
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        <Button 
+          variant="outlined" 
+          color="inherit" 
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/')}
+        >
+          Voltar
+        </Button>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          startIcon={<AddIcon />}
+          onClick={() => setModalOpen(true)}
+        >
+          Nova Tarefa
+        </Button>
+      </Box>
 
-        return (
-          <>
-            <IconButton edge="end" onClick={() => handleEdit(tarefa)} style={{ marginRight: '8px' }}>
-              <EditIcon color="action" />
-            </IconButton>
-            <IconButton edge="end" onClick={() => handleDelete(tarefa)}>
-              <DeleteIcon color="error" />
-            </IconButton>
-          </>
-        );
-      }}
-    />
+      <Lista
+        title="Tarefas Cadastradas"
+        items={tasks}
+        icon={<AssignmentIcon color="primary" />}
+        primaryExtractor={(tarefa) => tarefa.nome}
+        secondaryExtractor={(tarefa) => `Criada por: ${tarefa.criador} ${tarefa.isPersonal ? '(Pessoal)' : ''}`}
+        
+        renderActions={(tarefa) => {
+          if (!currentUser || currentUser._id !== tarefa.ownerId) {
+            return null; 
+          }
+
+          return (
+            <>
+              <IconButton edge="end" onClick={() => handleEdit(tarefa)} style={{ marginRight: '8px' }}>
+                <EditIcon color="action" />
+              </IconButton>
+              <IconButton edge="end" onClick={() => handleDelete(tarefa)}>
+                <DeleteIcon color="error" />
+              </IconButton>
+            </>
+          );
+        }}
+      />
+
+      {/* Instanciação do componente modal */}
+      <TaskFormModal 
+        open={modalOpen} 
+        handleClose={() => setModalOpen(false)} 
+      />
+
+    </Box>
   );
 
 };
