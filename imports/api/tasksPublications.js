@@ -1,17 +1,36 @@
 import { Meteor } from 'meteor/meteor';
 import { Tasks } from './TasksCollection';
 
-Meteor.publish('tasks.all', function publishTasks() {
-  // Garantia de segurança: se não houver usuário logado, não retorna nada
+
+const PAGE_LIMIT = 4;
+
+Meteor.publish('tasks.all', function publishTasks(showCompleted, searchQuery, page = 1) {
   if (!this.userId) {
     return this.ready(); 
   }
 
-  // O MongoDB retorna tarefas que atendam a pelo menos UMA das condições do $or
-  return Tasks.find({
+  const query = {
     $or: [
-      { isPersonal: { $ne: true } }, // Condição 1: A tarefa NÃO é pessoal (é pública)
-      { ownerId: this.userId }       // Condição 2: A tarefa É pessoal, mas pertence ao usuário logado
+      { isPersonal: { $ne: true } },
+      { ownerId: this.userId }
     ]
+  };
+
+  if (!showCompleted) {
+    query.situacao = { $ne: 'Concluída' };
+  }
+
+  if (searchQuery && searchQuery.trim() !== '') {
+    query.nome = { $regex: searchQuery.trim(), $options: 'i' };
+  }
+
+
+  const skip = (page - 1) * PAGE_LIMIT;
+
+ 
+  return Tasks.find(query, {
+    sort: { createdAt: -1 },
+    skip: skip,
+    limit: PAGE_LIMIT
   });
 });

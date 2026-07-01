@@ -9,16 +9,16 @@ Meteor.methods({
       throw new Meteor.Error('Não autorizado.', 'Você precisa estar logado para cadastrar tarefas.');
     }
 
-    // 2. Busca o nome do usuário para salvar no campo 'criador'
+
     const user = await Meteor.users.findOneAsync(this.userId);
     const nomeCriador = user.username || user.profile?.nome || 'Usuário';
 
-    // 3. Insere a nova tarefa no banco de dados
     return await Tasks.insertAsync({
       nome: taskData.nome,
       descricao: taskData.descricao,
       isPersonal: taskData.isPersonal || false,
       dataLimit: taskData.dataLimit || '',
+      hora: taskData.hora,
       situacao: 'Cadastrada', 
       createdAt: new Date(),
       ownerId: this.userId,  
@@ -64,6 +64,7 @@ Meteor.methods({
         descricao: taskData.descricao,
         situacao: taskData.situacao,
         dataLimit: taskData.dataLimit,
+        hora: taskData.hora,
       }
     });
   },

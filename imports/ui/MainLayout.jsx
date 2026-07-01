@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 
+
 import { 
   AppBar, 
   Toolbar, 
@@ -14,7 +15,6 @@ import {
   ListItemButton, 
   ListItemIcon, 
   ListItemText, 
-  Box, 
   Avatar, 
   Divider,
   Button
@@ -25,10 +25,12 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 
+
+import './styles.css';
+
 export const MainLayout = ({ children }) => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
-
 
   const user = useTracker(() => Meteor.user());
 
@@ -55,9 +57,9 @@ export const MainLayout = ({ children }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="main-layout-root">
       
-      {/* Barra Superior */}
+
       <AppBar position="static">
         <Toolbar>
           <IconButton
@@ -65,29 +67,31 @@ export const MainLayout = ({ children }) => {
             edge="start"
             color="inherit"
             aria-label="menu"
-            sx={{ mr: 2 }}
+            style={{ marginRight: '16px' }}
             onClick={toggleDrawer(true)}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          
+          <Typography variant="h6" component="div" className="appbar-title">
             To-Do List Advanced
           </Typography>
+          
           <Button color="inherit" onClick={handleLogout} startIcon={<LogoutIcon />}>
             Sair
           </Button>
         </Toolbar>
       </AppBar>
 
-      
+   
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-        <Box sx={{ width: 280 }} role="presentation">
+        <div className="drawer-content" role="presentation">
           
-       
-          <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+        
+          <div className="drawer-header">
             <Avatar 
               src={fotoUsuario} 
-              sx={{ width: 80, height: 80, mb: 2 }} 
+              className="drawer-avatar" 
             />
             <Typography variant="subtitle1" fontWeight="bold">
               {nomeUsuario}
@@ -95,11 +99,11 @@ export const MainLayout = ({ children }) => {
             <Typography variant="body2" color="textSecondary">
               {emailUsuario}
             </Typography>
-          </Box>
+          </div>
           
           <Divider />
 
-          {/* Links de Navegação */}
+         
           <List>
             <ListItem disablePadding>
               <ListItemButton onClick={() => handleNavigation('/tasks')}>
@@ -120,14 +124,14 @@ export const MainLayout = ({ children }) => {
             </ListItem>
           </List>
           
-        </Box>
+        </div>
       </Drawer>
 
-   
-      <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: '#f0f2f5' }}>
+      
+      <main className="main-content">
         {children}
-      </Box>
+      </main>
 
-    </Box>
+    </div>
   );
 };

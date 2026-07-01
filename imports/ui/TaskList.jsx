@@ -1,39 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
+import { Meteor } from 'meteor/meteor'; 
+import { ReactiveVar } from 'meteor/reactive-var';
 
-import { IconButton, CircularProgress, Box, Button } from '@mui/material';
+import { 
+  IconButton, 
+  CircularProgress, 
+  Button, 
+  FormControlLabel, 
+  Checkbox 
+} from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add'; 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import { Lista } from '../components/Lista.jsx';
+import { CampoTexto } from '../components/CampoTexto.jsx';
+import { Tasks } from '/imports/api/TasksCollection'; 
+import { TaskFormModal } from './TaskFormModal'; 
+import './styles.css';
 
-import { Tasks } from 'imports/api/TasksCollection';
-import { TaskFormModal } from './TaskFormModal';
+
+const showCompletedVar = new ReactiveVar(false);
+const searchQueryVar = new ReactiveVar('');
+const currentPageVar = new ReactiveVar(1);
 
 export const TaskList = () => {
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const currentUser = useTracker(() => Meteor.user());
+  const [modalOpen, setModalOpen] = useState(false);
+  
 
-    const currentUser = useTracker(() => Meteor.user());
+  const showCompleted = useTracker(() => showCompletedVar.get());
+  const searchQuery = useTracker(() => searchQueryVar.get());
+  const currentPage = useTracker(() => currentPageVar.get());
 
-    const [modalOpen, setModalOpen] = useState(false);
 
-  const { tasks, isLoading } = useTracker(() => {
-    const subscription = Meteor.subscribe('tasks.all');
+
+
+  useEffect(() => {
+    currentPageVar.set(1);
+  }, [showCompleted, searchQuery]);
+
+ 
+const { tasks, isLoading } = useTracker(() => {
+  
+    const subscription = Meteor.subscribe('tasks.all', showCompleted, searchQuery, currentPage);
     
     return {
-      isLoading: !subscription.ready(), // true enquanto os dados não chegam do servidor
-      tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch() // Busca as tarefas ordenadas pelas mais recentes
+      isLoading: !subscription.ready(),
+     
+      tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch()
     };
-  });
+  }, [showCompleted, searchQuery, currentPage]);
 
   const handleEdit = (tarefa) => {
-
     navigate(`/tasks/${tarefa._id}`);
   };
 
@@ -45,19 +70,18 @@ export const TaskList = () => {
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
+      <div className="loading-container">
         <CircularProgress />
-      </Box>
+      </div>
     );
   }
 
+  const hasNextPage = tasks.length === 4;
 
-
-  return (
-    <Box sx={{ p: 2, maxWidth: '600px', margin: '0 auto' }}>
+ return (
+    <div className="task-list-container">
       
-    
-      <Box display="flex" justifyContent="flex-end" mb={2}>
+      <div className="task-list-actions">
         <Button 
           variant="outlined" 
           color="inherit" 
@@ -66,6 +90,28 @@ export const TaskList = () => {
         >
           Voltar
         </Button>
+        
+      
+        <div className="search-container">
+          <CampoTexto 
+            label="Pesquisar tarefas por nome..."
+            value={searchQuery}
+            onChange={(e) => searchQueryVar.set(e.target.value)}
+            isEditing={true}
+          />
+        </div>
+
+        <FormControlLabel
+          control={
+            <Checkbox 
+              checked={showCompleted} 
+              onChange={(e) => showCompletedVar.set(e.target.checked)} 
+            />
+          }
+          label="Exibir tarefas concluídas"
+          className="checkbox-label"
+        />
+        
         <Button 
           variant="contained" 
           color="primary" 
@@ -74,15 +120,14 @@ export const TaskList = () => {
         >
           Nova Tarefa
         </Button>
-      </Box>
+      </div>
 
       <Lista
         title="Tarefas Cadastradas"
         items={tasks}
         icon={<AssignmentIcon color="primary" />}
-        primaryExtractor={(tarefa) => tarefa.nome}
+        primaryExtractor={(tarefa) => tarefa.hora ? `${tarefa.hora} - ${tarefa.nome}` : tarefa.nome}
         secondaryExtractor={(tarefa) => `Criada por: ${tarefa.criador} ${tarefa.isPersonal ? '(Pessoal)' : ''}`}
-        
         renderActions={(tarefa) => {
           if (!currentUser || currentUser._id !== tarefa.ownerId) {
             return null; 
@@ -101,13 +146,32 @@ export const TaskList = () => {
         }}
       />
 
-      {/* Instanciação do componente modal */}
+      <div className="pagination-container">
+        <Button 
+          variant="outlined" 
+          disabled={currentPage === 1} 
+          onClick={() => currentPageVar.set(currentPage - 1)}
+        >
+          Anterior
+        </Button>
+        
+        <span className="pagination-text">Página {currentPage}</span>
+        
+        <Button 
+          variant="outlined" 
+          disabled={!hasNextPage} 
+          onClick={() => currentPageVar.set(currentPage + 1)}
+        >
+          Próxima
+        </Button>
+      </div>
+
       <TaskFormModal 
         open={modalOpen} 
         handleClose={() => setModalOpen(false)} 
       />
 
-    </Box>
+    </div>
   );
 
 };

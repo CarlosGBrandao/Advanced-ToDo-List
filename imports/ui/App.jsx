@@ -1,48 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { LoginForm } from './LoginForm';
-import { RegisterForm } from './RegisterForm';
+
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/pt-br';
+
+
+import { MainLayout } from './MainLayout';
 import { Dashboard } from './Dashboard';
 import { TaskList } from './TaskList';
 import { UserProfile } from './UserProfile';
 import { TaskDetails } from './TaskDetails';
-import { MainLayout } from './MainLayout';
+import { LoginForm } from './LoginForm';
+import { RegisterForm } from './RegisterForm';
 
 export const App = () => {
+
   const user = useTracker(() => Meteor.user());
   const loggingIn = useTracker(() => Meteor.loggingIn());
-  const [showLogin, setShowLogin] = useState(true);
+
 
   if (loggingIn) {
-    return <div>Carregando...</div>;
-  }
-
-
-  if (!user) {
-    return (
-      <div className="auth-container">
-        {showLogin ? <LoginForm /> : <RegisterForm />}
-        <button onClick={() => setShowLogin(!showLogin)}>
-          {showLogin ? 'Cadastrar-se' : 'Fazer login'}
-        </button>
-      </div>
-    );
+    return null; 
   }
 
   return (
-    <BrowserRouter>
-    <MainLayout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/tasks" element={<TaskList />} />
-        <Route path="*" element={<Navigate to="/" />} />
-        <Route path="/profile" element={<UserProfile />} />
-        <Route path="/tasks/:taskId" element={<TaskDetails />} />
-      </Routes>
-      </MainLayout>
-    </BrowserRouter>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+      <BrowserRouter>
+        {user ? (
+       
+          <MainLayout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/tasks" element={<TaskList />} />
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/tasks/:taskId" element={<TaskDetails />} />
+              
+           
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </MainLayout>
+        ) : (
+    
+          <Routes>
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/register" element={<RegisterForm />} />
+            
+        
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        )}
+      </BrowserRouter>
+    </LocalizationProvider>
   );
 };

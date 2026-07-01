@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-
-import { Box, TextField, Button, Typography } from '@mui/material';
-
+import { Button, Typography } from '@mui/material';
 
 import { EnviarImagem } from '../components/EnviarImagem';
 import { Seletor } from '../components/Seletor';
+import { CampoTexto } from '../components/CampoTexto';
+import './styles.css';
 
 export const UserProfile = () => {
   const user = useTracker(() => Meteor.user());
@@ -18,13 +18,7 @@ export const UserProfile = () => {
   const [empresa, setEmpresa] = useState('');
   const [fotoBase64, setFotoBase64] = useState('');
 
-
-  const opcoesSexo = [
-    'Masculino', 
-    'Feminino', 
-    'Outro', 
-    'Prefiro não informar'
-  ];
+  const opcoesSexo = ['Masculino', 'Feminino', 'Outro'];
 
   useEffect(() => {
     if (user?.profile) {
@@ -48,42 +42,23 @@ export const UserProfile = () => {
   };
 
   return (
-    <Box sx={{ p: 4, flexGrow: 1 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="profile-container">
+      <Typography variant="h4" className="profile-title">
         Meu Perfil
       </Typography>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px' }}>
-        
+      <form onSubmit={handleSubmit} className="profile-form">
         
         <EnviarImagem 
           currentImage={fotoBase64} 
           onImageChange={setFotoBase64} 
         />
 
-        <TextField 
-          label="Nome" 
-          value={nome} 
-          onChange={(e) => setNome(e.target.value)} 
-          required fullWidth 
-        />
-
-        <TextField 
-          label="E-mail" type="email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required fullWidth 
-        />
-
-        <TextField 
-          label="Data de Nascimento" type="date" 
-          value={dataNascimento} 
-          onChange={(e) => setDataNascimento(e.target.value)} 
-          InputLabelProps={{ shrink: true }}
-          required fullWidth 
-        />
-
       
+        <CampoTexto label="Nome" value={nome} onChange={(e) => setNome(e.target.value)} isEditing={true} required />
+        <CampoTexto label="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} isEditing={true} required />
+        <CampoTexto label="Data de Nascimento" type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} isEditing={true} required />
+        
         <Seletor
           label="Sexo"
           value={sexo}
@@ -92,17 +67,12 @@ export const UserProfile = () => {
           required
         />
 
-        <TextField 
-          label="Empresa" 
-          value={empresa} 
-          onChange={(e) => setEmpresa(e.target.value)} 
-          fullWidth 
-        />
+        <CampoTexto label="Empresa" value={empresa} onChange={(e) => setEmpresa(e.target.value)} isEditing={true} />
 
-        <Button type="submit" variant="contained" color="primary" size="large" sx={{ mt: 2 }}>
+        <Button type="submit" variant="contained" color="primary" size="large" className="profile-submit-btn">
           Salvar Dados
         </Button>
       </form>
-    </Box>
+    </div>
   );
 };

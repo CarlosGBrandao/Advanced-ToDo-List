@@ -4,11 +4,15 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 import { Tasks } from '/imports/api/TasksCollection';
 
-import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material';
+
+import { Button, Typography, CircularProgress } from '@mui/material';
 
 import { Seletor } from '../components/Seletor';
 import { CampoTexto } from '../components/CampoTexto';
 import { MaquinaEstados } from '../components/MaquinaEstados';
+
+
+import './styles.css';
 
 export const TaskDetails = () => {
   const { taskId } = useParams();
@@ -19,35 +23,41 @@ export const TaskDetails = () => {
   const [descricao, setDescricao] = useState('');
   const [situacao, setSituacao] = useState('');
   const [dataLimit, setDataLimit] = useState('');
+  const [hora, setHora] = useState('');
   const [criador, setCriador] = useState('');
 
   const { task, isLoading } = useTracker(() => {
-  const subscription = Meteor.subscribe('tasks.all');
-  return {
-    isLoading: !subscription.ready(),
-    task: Tasks.findOne(taskId),
-  };
-}, [taskId]);
-
+    const subscription = Meteor.subscribe('tasks.all');
+    return {
+      isLoading: !subscription.ready(),
+      task: Tasks.findOne(taskId),
+    };
+  }, [taskId]);
 
   useEffect(() => {
- 
-  if (task && !isEditing) {
-    setNome(task.nome || '');
-    setDescricao(task.descricao || '');
-    setSituacao(task.situacao || 'Cadastrada');
-    setDataLimit(task.dataLimit || '');
-    setCriador(task.criador || '');
-  }
-}, [task, isEditing]);
+    if (task && !isEditing) {
+      setNome(task.nome || '');
+      setDescricao(task.descricao || '');
+      setSituacao(task.situacao || 'Cadastrada');
+      setDataLimit(task.dataLimit || '');
+      setHora(task.hora || '');
+      setCriador(task.criador || '');
+    }
+  }, [task, isEditing]);
 
-  if (isLoading) return <Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box>;
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <CircularProgress />
+      </div>
+    );
+  }
   
   if (!task) return (
-    <Box p={4}>
+    <div style={{ padding: '32px' }}>
       <Typography color="error">Tarefa não encontrada.</Typography>
-      <Button onClick={() => navigate('/tasks')} variant="contained" sx={{ mt: 2 }}>Voltar</Button>
-    </Box>
+      <Button onClick={() => navigate('/tasks')} variant="contained" style={{ marginTop: '16px' }}>Voltar</Button>
+    </div>
   );
 
   const isOwner = Meteor.userId() === task.ownerId;
@@ -60,7 +70,7 @@ export const TaskDetails = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-    Meteor.call('tasks.update', taskId, { nome, descricao, situacao, dataLimit }, (error) => {
+    Meteor.call('tasks.update', taskId, { nome, descricao, situacao, dataLimit, hora }, (error) => {
       if (error) alert(error.reason);
       else {
         setIsEditing(false);
@@ -70,10 +80,10 @@ export const TaskDetails = () => {
   };
 
   return (
-    <Box sx={{ p: 4, flexGrow: 1 }}>
-      <Paper elevation={3} sx={{ p: 4, maxWidth: '700px' }}>
+    <div className="task-details-container">
+      <div className="task-details-paper">
         
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <div className="task-details-header">
           <Typography variant="h4">
             {isEditing ? 'Editar Tarefa' : 'Visualizar Tarefa'}
           </Typography>
@@ -82,9 +92,9 @@ export const TaskDetails = () => {
               Editar Dados
             </Button>
           )}
-        </Box>
+        </div>
 
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleSave} className="task-form">
           
           <CampoTexto label="Nome da Tarefa" value={nome} onChange={(e) => setNome(e.target.value)} isEditing={isEditing} required />
           <CampoTexto label="Descrição" value={descricao} onChange={(e) => setDescricao(e.target.value)} isEditing={isEditing} multiline rows={3} />
@@ -95,25 +105,50 @@ export const TaskDetails = () => {
             <CampoTexto label="Situação Atual" value={situacao} isEditing={false} />
           )}
 
-          <CampoTexto label="Data Limite" type="date" value={dataLimit} onChange={(e) => setDataLimit(e.target.value)} isEditing={isEditing} />
+          <div className="form-row">
+  <div className="form-col">
+    <CampoTexto 
+      label="Data Limite" 
+      type="date" 
+      value={dataLimit} 
+      onChange={(e) => setDataLimit(e.target.value)} 
+      isEditing={isEditing} 
+    />
+  </div>
+  <div className="form-col">
+    <CampoTexto 
+      label="Hora" 
+      type="time" 
+      value={hora} 
+      onChange={(e) => setHora(e.target.value)} 
+      isEditing={isEditing} 
+      InputLabelProps={{ shrink: true }} 
+    />
+  </div>
+</div>
           
           <CampoTexto label="Criado por" value={criador} isEditing={false} />
 
           {isEditing ? (
-            <Box display="flex" gap={2} mt={2}>
+            <div className="task-form-actions">
               <Button type="submit" variant="contained" color="primary">Salvar Alterações</Button>
               <Button variant="outlined" color="inherit" onClick={() => setIsEditing(false)}>Cancelar</Button>
-            </Box>
+            </div>
           ) : (
             isOwner && <MaquinaEstados situacaoAtual={situacao} onMudarStatus={handleMudarStatus} />
           )}
 
-          <Button variant="text" color="inherit" onClick={() => navigate('/tasks')} sx={{ alignSelf: 'flex-start', mt: 1 }}>
+          <Button 
+            variant="text" 
+            color="inherit" 
+            onClick={() => navigate('/tasks')} 
+            className="btn-voltar-lista"
+          >
             ← Voltar para a Lista
           </Button>
 
         </form>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 };

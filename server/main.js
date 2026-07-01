@@ -4,18 +4,17 @@ import '/imports/api/tasksPublications';
 import '/imports/api/userMethods';
 import '/imports/api/tasksMethods';
 
-// Adicionamos o "async" antes da função do startup
+
 Meteor.startup(async () => {
   
-  // Usamos await e countAsync()
+
   if (await Tasks.find().countAsync() === 0) {
-    console.log('Banco de dados vazio. Criando tarefas de teste...');
 
     
     await Tasks.insertAsync({
       nome: 'Aprender rotas no React',
       criador: 'sistema',
-      ownerId: 'id_falso_123', 
+      ownerId: '123123123', 
       isPersonal: false,
       situacao: 'Cadastrada',
       createdAt: new Date(),
@@ -23,14 +22,14 @@ Meteor.startup(async () => {
 
     
     await Tasks.insertAsync({
-      nome: 'Comprar presente de aniversário',
+      nome: 'Comprar presente',
       criador: 'joao',
-      ownerId: 'id_falso_456', 
+      ownerId: '0345803845', 
       isPersonal: true, 
       situacao: 'Em Andamento',
       createdAt: new Date(),
     });
 
-    console.log('Tarefas de teste criadas com sucesso!');
+    console.log('Tarefas criadas');
   }
 });

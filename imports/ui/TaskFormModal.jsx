@@ -5,17 +5,20 @@ import {
   DialogTitle, 
   DialogContent, 
   DialogActions, 
-  TextField, 
   Button, 
   FormControlLabel, 
-  Checkbox, 
-  Box 
+  Checkbox,
+  Box
 } from '@mui/material';
+
+import { CampoTexto } from '../components/CampoTexto'; 
+import './styles.css';
 
 export const TaskFormModal = ({ open, handleClose }) => {
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [dataLimit, setDataLimit] = useState('');
+  const [hora, setHora] = useState('');
   const [isPersonal, setIsPersonal] = useState(false);
 
   const resetForm = () => {
@@ -23,58 +26,70 @@ export const TaskFormModal = ({ open, handleClose }) => {
     setDescricao('');
     setDataLimit('');
     setIsPersonal(false);
+    setHora('');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const taskData = { nome, descricao, dataLimit, isPersonal };
+    const taskData = { nome, descricao, dataLimit, hora, isPersonal };
 
     Meteor.call('tasks.insert', taskData, (error) => {
       if (error) {
         alert('Erro ao cadastrar tarefa: ' + error.reason);
       } else {
         resetForm();
-        handleClose(); 
+        handleClose();
       }
     });
   };
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Nova Tarefa</DialogTitle>
+      <DialogTitle className="custom-dialog-title">Nova Tarefa</DialogTitle>
       
       <form onSubmit={handleSubmit}>
         <DialogContent dividers>
-          <Box display="flex" flexDirection="column" gap="20px">
-            
-            <TextField
-              label="Nome da Tarefa"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              required
-              fullWidth
+          
+          <div className="modal-form-content">
+            <CampoTexto 
+              label="Nome da Tarefa" 
+              value={nome} 
+              onChange={(e) => setNome(e.target.value)} 
+              isEditing={true} 
+              required 
             />
 
-            <TextField
-              label="Descrição"
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
-              multiline
-              rows={3}
-              fullWidth
+            <CampoTexto 
+              label="Descrição" 
+              value={descricao} 
+              onChange={(e) => setDescricao(e.target.value)} 
+              isEditing={true} 
+              multiline 
+              rows={3} 
             />
 
-            <TextField
-              label="Data Limite"
-              type="date"
-              value={dataLimit}
-              onChange={(e) => setDataLimit(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
+            <div className="form-row">
+  <div className="form-col">
+    <CampoTexto 
+      label="Data Limite" 
+      type="date" 
+      value={dataLimit} 
+      onChange={(e) => setDataLimit(e.target.value)} 
+      isEditing={true} 
+    />
+  </div>
+  <div className="form-col">
+    <CampoTexto 
+      label="Hora" 
+      type="time" 
+      value={hora} 
+      onChange={(e) => setHora(e.target.value)} 
+      isEditing={true}
+      InputLabelProps={{ shrink: true }} 
+    />
+  </div>
+</div>
 
-         
             <FormControlLabel
               control={
                 <Checkbox 
@@ -85,19 +100,25 @@ export const TaskFormModal = ({ open, handleClose }) => {
               }
               label="Esta é uma tarefa pessoal?"
             />
+          </div>
 
-          </Box>
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions className="custom-dialog-actions">
           <Button onClick={handleClose} color="inherit">
             Cancelar
           </Button>
-          <Button type="submit" variant="contained" color="primary">
+          <Button 
+            type="submit" 
+            variant="contained" 
+            color="primary" 
+            className="modal-submit-btn"
+          >
             Cadastrar
           </Button>
         </DialogActions>
       </form>
     </Dialog>
   );
+
 };
