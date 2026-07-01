@@ -12,22 +12,28 @@ Meteor.startup(async () => {
 
     
     await Tasks.insertAsync({
-      nome: 'Aprender rotas no React',
-      criador: 'sistema',
-      ownerId: '123123123', 
-      isPersonal: false,
-      situacao: 'Cadastrada',
-      createdAt: new Date(),
+      nome: 'TAREFAS TESTE',
+        descricao: 'tarefa automatica',
+        isPersonal: false,
+        dataLimit: '2026-12-31',
+        hora: '12:00',
+        situacao: 'Cadastrada',
+        createdAt: new Date(),
+        ownerId: '012301230123', 
+        criador: 'Sistema'
     });
 
     
     await Tasks.insertAsync({
-      nome: 'Comprar presente',
-      criador: 'joao',
-      ownerId: '0345803845', 
-      isPersonal: true, 
-      situacao: 'Em Andamento',
-      createdAt: new Date(),
+       nome: 'TAREFAS AUTOMATICA',
+        descricao: 'tarefa automatica para testes',
+        isPersonal: false,
+        dataLimit: '2026-12-31',
+        hora: '14:00',
+        situacao: 'Cadastrada',
+        createdAt: new Date(),
+        ownerId: '0123012301232323', 
+        criador: 'Sistema'
     });
 
     console.log('Tarefas criadas');

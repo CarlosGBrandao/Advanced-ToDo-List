@@ -4,11 +4,9 @@ import { Tasks } from './TasksCollection';
 Meteor.methods({
 
   async 'tasks.insert'(taskData) {
-   
     if (!this.userId) {
       throw new Meteor.Error('Não autorizado.', 'Você precisa estar logado para cadastrar tarefas.');
     }
-
 
     const user = await Meteor.users.findOneAsync(this.userId);
     const nomeCriador = user.username || user.profile?.nome || 'Usuário';
@@ -27,24 +25,20 @@ Meteor.methods({
   },
 
   async 'tasks.remove'(taskId) {
-
     if (!this.userId) {
       throw new Meteor.Error('Não autorizado.', 'Você precisa estar logado para excluir tarefas.');
     }
 
-   
     const task = await Tasks.findOneAsync(taskId);
 
     if (!task) {
       throw new Meteor.Error('Não encontrada.', 'A tarefa que você tentou excluir não existe.');
     }
 
- 
     if (task.ownerId !== this.userId) {
       throw new Meteor.Error('Acesso negado.', 'Você só pode excluir as tarefas que você mesmo criou.');
     }
 
-  
     await Tasks.removeAsync(taskId);
   },
 
@@ -69,7 +63,6 @@ Meteor.methods({
     });
   },
 
-
   async 'tasks.updateStatus'(taskId, novaSituacao) {
     if (!this.userId) {
       throw new Meteor.Error('Não autorizado.');
@@ -83,5 +76,43 @@ Meteor.methods({
     await Tasks.updateAsync(taskId, {
       $set: { situacao: novaSituacao }
     });
+  },
+
+  
+  async 'tasks.getCounts'() {
+    if (!this.userId) {
+      throw new Meteor.Error('Não autorizado.', 'Você precisa estar logado para ver as métricas.');
+    }
+
+    
+    const filtroVisibilidade = {
+      $or: [
+        { isPersonal: { $ne: true } },
+        { ownerId: this.userId }
+      ]
+    };
+
+    
+    const totalCadastradas = await Tasks.find({ 
+      situacao: 'Cadastrada',
+      ...filtroVisibilidade
+    }).countAsync();
+
+    const totalEmAndamento = await Tasks.find({ 
+      situacao: 'Em Andamento',
+      ...filtroVisibilidade
+    }).countAsync();
+
+    const totalConcluidas = await Tasks.find({ 
+      situacao: { $in: ['Concluída', 'Concluídas'] },
+      ...filtroVisibilidade
+    }).countAsync();
+
+    return {
+      cadastradas: totalCadastradas,
+      emAndamento: totalEmAndamento,
+      concluidas: totalConcluidas
+    };
   }
+
 });

@@ -29,7 +29,8 @@ export const UserProfile = () => {
       setEmpresa(user.profile.empresa || '');
       setFotoBase64(user.profile.fotoBase64 || '');
     }
-  }, [user]);
+ 
+  }, [user?._id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

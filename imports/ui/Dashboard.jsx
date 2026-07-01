@@ -1,9 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-import { Tasks } from '/imports/api/TasksCollection';
-
 
 import { Typography, Button, CircularProgress } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -12,30 +9,28 @@ import DoneIcon from '@mui/icons-material/Done';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 import { Metricas } from '../components/Metricas';
-
-
 import './styles.css';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
 
-  const { totalCadastradas, totalEmAndamento, totalConcluidas, isLoading } = useTracker(() => {
-    const subscription = Meteor.subscribe('tasks.all');
-    const ready = subscription.ready();
+  // Criamos estados para guardar os números e o loading
+  const [counts, setCounts] = useState({ cadastradas: 0, emAndamento: 0, concluidas: 0 });
+  const [isLoading, setIsLoading] = useState(true);
 
-    if (!ready) {
-      return { isLoading: true };
-    }
-
-    const tarefas = Tasks.find({}).fetch();
-
-    return {
-      isLoading: false,
-      totalCadastradas: tarefas.filter(t => t.situacao === 'Cadastrada').length,
-      totalEmAndamento: tarefas.filter(t => t.situacao === 'Em Andamento').length,
-      totalConcluidas: tarefas.filter(t => t.situacao === 'Concluída' || t.situacao === 'Concluídas').length,
-    };
-  });
+  // useEffect vai rodar 1 vez assim que o Dashboard abrir
+  useEffect(() => {
+    Meteor.call('tasks.getCounts', (error, result) => {
+      if (error) {
+        console.error("Erro ao buscar métricas:", error);
+        alert("Não foi possível carregar as métricas.");
+      } else {
+        // Se deu sucesso, atualizamos os números na tela
+        setCounts(result);
+      }
+      setIsLoading(false); // Tiramos o símbolo de carregamento
+    });
+  }, []); // [] garante que só chame o servidor uma vez ao montar a tela
 
   if (isLoading) {
     return (
@@ -52,30 +47,27 @@ export const Dashboard = () => {
         Início
       </Typography>
 
-      
       <div className="dashboard-metrics-grid">
-        
         <Metricas 
           title="Total de Tarefas Cadastradas" 
-          value={totalCadastradas} 
+          value={counts.cadastradas} 
           color="#2196f3" 
           icon={<AssignmentIcon style={{ color: '#2196f3' }} />}
         />
         
         <Metricas
           title="Total de Tarefas em Andamento" 
-          value={totalEmAndamento} 
+          value={counts.emAndamento} 
           color="#ff9800" 
           icon={<PlayArrowIcon style={{ color: '#ff9800' }} />}
         />
         
         <Metricas 
           title="Total de Tarefas Concluídas" 
-          value={totalConcluidas} 
+          value={counts.concluidas} 
           color="#4caf50" 
           icon={<DoneIcon style={{ color: '#4caf50' }} />}
         />
-
       </div>
 
       <div className="dashboard-actions">

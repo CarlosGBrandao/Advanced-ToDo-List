@@ -5,7 +5,7 @@ export const MaquinaEstados = ({ situacaoAtual, onMudarStatus }) => {
   return (
     <Box mt={3}>
       <Typography variant="subtitle2" gutterBottom color="textSecondary">
-        Ações de Transição (Máquina de Estados):
+        Situação:
       </Typography>
       
       <ButtonGroup variant="outlined" fullWidth>

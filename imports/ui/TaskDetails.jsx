@@ -26,13 +26,15 @@ export const TaskDetails = () => {
   const [hora, setHora] = useState('');
   const [criador, setCriador] = useState('');
 
-  const { task, isLoading } = useTracker(() => {
-    const subscription = Meteor.subscribe('tasks.all');
+const { task, isLoading } = useTracker(() => {
+    
+    const subscription = Meteor.subscribe('tasks.all', true, '', 1); 
+    
     return {
       isLoading: !subscription.ready(),
       task: Tasks.findOne(taskId),
     };
-  }, [taskId]);
+  }, [taskId]);;
 
   useEffect(() => {
     if (task && !isEditing) {

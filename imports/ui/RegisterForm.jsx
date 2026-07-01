@@ -90,7 +90,7 @@ export const RegisterForm = ({ onSwitchToLogin }) => {
         alert("Erro ao criar conta: " + error.reason);
       } else {
         alert("Conta criada com sucesso!");
-        navigate('/tasks'); 
+        navigate('/'); 
       }
     });
   };

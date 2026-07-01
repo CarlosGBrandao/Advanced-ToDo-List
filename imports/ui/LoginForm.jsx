@@ -64,16 +64,16 @@ export const LoginForm = () => {
 
     if (!username.value || username.value.length < 3) {
       setUsernameError(true);
-      setUsernameErrorMessage('Por favor, insira um usuário válido.');
+      setUsernameErrorMessage('nome de usuario inválido');
       isValid = false;
     } else {
       setUsernameError(false);
       setUsernameErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password.value || password.value.length < 3) {
       setPasswordError(true);
-      setPasswordErrorMessage('A senha deve ter pelo menos 6 caracteres.');
+      setPasswordErrorMessage('senha muito pequena');
       isValid = false;
     } else {
       setPasswordError(false);
@@ -98,7 +98,7 @@ export const LoginForm = () => {
         alert("Erro ao entrar: " + error.reason);
       } else {
      
-        navigate('/tasks'); 
+        navigate('/'); 
       }
     });
   };
